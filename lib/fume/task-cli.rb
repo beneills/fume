@@ -370,6 +370,10 @@ module Fume
         end
 
         unless time.empty?
+          # TODO: there is no @entries method of TaskCLI
+          # I'm guessing this is an error.  Crashes for me when I get here.
+          # Should probably be changed to @fumes.entries, but I'm not 100%
+          #   so I'll leave it as-is.
           @entries.running_entries.each do |id, e|
             @fumes.edit id, :start_time => time
           end
@@ -381,12 +385,22 @@ module Fume
         end
         
         ctx = choose_context
-        start_time = @fumes.parse_time(ask("When did you start? ", String) do |q|
-                                         q.readline = true
-                                       end)
-        stop_time = @fumes.parse_time(ask("When did you stop? [leave empty to keep open] ", String) do |q|
-                                        q.readline = true
-                                      end)
+
+        input = ask("When did you start? [leave empty for oneoff, q for quit] ", String) do |q|
+          q.readline = true
+        end
+
+        if input == "q"
+          return
+        elsif input.empty? # else if oneoff, implemented as 1 hour ago till present
+          start_time = @fumes.parse_time("1 hour ago")
+          stop_time = @fumes.parse_time("now")
+        else # else regular user-supplied time duration
+          start_time = @fumes.parse_time(input)
+          stop_time = @fumes.parse_time(ask("When did you stop? [leave empty to keep open] ", String) do |q|
+                                          q.readline = true
+                                        end)
+        end
 
         unless start_time.nil?
           @fumes.start ctx, start_time
