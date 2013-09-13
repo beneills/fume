@@ -25,6 +25,10 @@ module Fume
         orwellize
       end
 
+      add_command "qu(i)ck orwellize" do
+        quick_orwellize
+      end
+
       add_command "upload" do
         if @upload_state == :working
           # This error won't be usually visible, due to `clear` call
@@ -316,6 +320,7 @@ module Fume
                 :check_out,
                 :upload,
                 :orwellize,
+                :quick_orwellize,
                 :quit,
                ]
       exec_command prompt, "What do you want to do next?"
@@ -410,6 +415,25 @@ module Fume
           manual_mode if stop_time.nil?
           @fumes.stop stop_time
         end
+      end
+    end
+
+    def quick_orwellize
+      # add a new context
+      if @last_shown_contexts.empty? # have never shown anything, so do it now
+        show_contexts :all
+      end
+      
+      ctx = choose_context
+      mins = ask("How many minutes have you been doing this? ", Integer) do |q|
+        q.readline = true
+      end
+      start_time = @fumes.parse_time("#{mins} minutes ago")
+      stop_time = @fumes.parse_time("now")
+      
+      unless start_time.nil?
+        @fumes.start ctx, start_time
+        @fumes.stop stop_time
       end
     end
 
