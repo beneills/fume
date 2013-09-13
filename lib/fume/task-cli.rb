@@ -468,7 +468,6 @@ module Fume
         timebox.start do 
           system "clear"
           system "mplayer -really-quiet #{@signal_file} &"
-          system "gxmessage -timeout 5 'やった！(*＾０＾*)' &"
         end
       end
 
